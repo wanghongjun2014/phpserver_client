@@ -1,0 +1,49 @@
+# PHPClient
+## 特性(v1.3.5)
+* 客户端负载均衡
+* 故障节点自动剔除及健康嗅探
+* 支持权重设置
+* 支持异步调用
+* 兼容旧版调用方式
+> **提示** :异步不支持旧版调用方式
+## 配置
+``` php
+        <?php
+        namespace Config;
+        class PHPClient
+        {
+            // rpc_secret_key
+            public $rpc_secret_key = '769af463a39f077a0340a189e9c1ec28';
+            // 服务名称
+            public $User = array(
+                // 客户端负载均衡，注意只有PHPClient版本大于等于1.1.5才支持客户端负载均衡       
+                'uri'=>array(
+                    '172.20.4.56:2219', // 格式为 节点ip:端口:权重
+                ),
+                'user' => 'Optool',   //调用者
+                'secret' => '{1BA09530-F9E6-478D-9965-7EB31A59537E}',
+            );
+        }
+```
+## 示例
+* 方式一(推荐)
+``` php
+$data = \PHPClient\Text::inst('User')->setClass('Info')->byUid(5100);
+```
+> 如果是老的客户端(不使用handler规范),需在配置中加上小于2的版本号，如：`'ver'=>1.0`, 参考example中的config文件
+* 方式二(旧版)
+``` php
+$data = RpcClient_User_Info::instance()->byUid(5100);
+```
+### 同步调用
+> 上述两种方法均为同步调用
+### 异步调用
+``` php
+$request1 = \PHPClient\Text::inst('User')->setAsyncClass('Info')->byUid(5100);
+$request2 = \PHPClient\Text::inst('User')->setAsyncClass('Info')->byName('Nickle');
+//服务端已在同时处理request1 和request2的请求.
+/*..... 其他业务逻辑.....*/
+//获取异步调用的结果。
+$result1 = $request1->result; //阻塞，直至服务端返回request1的结果。
+$result2 = $request2->result;
+``` 
